@@ -5,6 +5,7 @@ import com.tterrag.dummyplayers.entity.DummyPlayerEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Rotations;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -40,7 +42,7 @@ public class DummyPlayerItem extends Item {
         BlockPos blockPos = new BlockPlaceContext(context).getClickedPos();
 
 		Vec3 placePos = Vec3.atBottomCenterOf(blockPos);
-		AABB aabb = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(placePos.x(), placePos.y(), placePos.z());
+		AABB aabb = DummyPlayers.DUMMY_PLAYER.get().getDimensions().makeBoundingBox(placePos.x(), placePos.y(), placePos.z());
         if (!level.noCollision(null, aabb) || !level.getEntities(null, aabb).isEmpty()) {
             return InteractionResult.FAIL;
         }
@@ -48,6 +50,11 @@ public class DummyPlayerItem extends Item {
         ItemStack itemStack = context.getItemInHand();
         if (level instanceof ServerLevel serverLevel) {
             Consumer<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
+            ResolvableProfile profile = itemStack.get(DataComponents.PROFILE);
+            if (profile != null) {
+                consumer = consumer.andThen(dummy -> dummy.setAndFillProfile(profile));
+            }
+
             DummyPlayerEntity dummy = DummyPlayers.DUMMY_PLAYER.get().create(serverLevel, consumer, blockPos, MobSpawnType.SPAWN_EGG, true, true);
             if (dummy == null) {
                 return InteractionResult.FAIL;

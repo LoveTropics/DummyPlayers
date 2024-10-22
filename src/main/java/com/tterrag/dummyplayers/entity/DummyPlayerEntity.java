@@ -85,7 +85,7 @@ public class DummyPlayerEntity extends ArmorStand {
 	}
 
 	public ResolvableProfile getProfile() {
-		return this.entityData.get(GAME_PROFILE);
+		return entityData.get(GAME_PROFILE);
 	}
 
 	@Override
@@ -114,15 +114,18 @@ public class DummyPlayerEntity extends ArmorStand {
 		if (compound.contains("profile")) {
 			ResolvableProfile.CODEC.parse(NbtOps.INSTANCE, compound.get("profile"))
 					.resultOrPartial(error -> LOGGER.error("Failed to parse profile: {}", error))
-					.ifPresent(profile -> {
-						// Only update the profile (and thus the texture) if it has changed in some way
-						// Avoids unnecessary texture reloads on the client when changing pose/name
-						if (!getProfile().equals(profile)) {
-							this.entityData.set(GAME_PROFILE, profile);
-							fillProfile();
-						}
-					});
+					.ifPresent(this::setAndFillProfile);
 		}
+	}
+
+	public void setAndFillProfile(ResolvableProfile profile) {
+		// Only update the profile (and thus the texture) if it has changed in some way
+		// Avoids unnecessary texture reloads on the client when changing pose/name
+		if (getProfile().equals(profile)) {
+			return;
+		}
+		entityData.set(GAME_PROFILE, profile);
+		fillProfile();
 	}
 
 	void fillProfile() {
