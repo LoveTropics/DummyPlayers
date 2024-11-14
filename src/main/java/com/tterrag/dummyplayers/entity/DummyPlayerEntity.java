@@ -39,6 +39,8 @@ public class DummyPlayerEntity extends ArmorStand {
 	private static final EntityDataAccessor<Optional<Component>> PREFIX = SynchedEntityData.defineId(DummyPlayerEntity.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 	private static final EntityDataAccessor<Optional<Component>> SUFFIX = SynchedEntityData.defineId(DummyPlayerEntity.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 
+	private static final ResolvableProfile NO_PROFILE = new ResolvableProfile(Optional.empty(), Optional.empty(), new PropertyMap());
+
 	@Nullable
 	private ClientData clientData;
 
@@ -55,7 +57,7 @@ public class DummyPlayerEntity extends ArmorStand {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(GAME_PROFILE, new ResolvableProfile(Optional.empty(), Optional.empty(), new PropertyMap()));
+		builder.define(GAME_PROFILE, NO_PROFILE);
 		builder.define(PREFIX, Optional.empty());
 		builder.define(SUFFIX, Optional.empty());
 	}
@@ -115,6 +117,8 @@ public class DummyPlayerEntity extends ArmorStand {
 			ResolvableProfile.CODEC.parse(NbtOps.INSTANCE, compound.get("profile"))
 					.resultOrPartial(error -> LOGGER.error("Failed to parse profile: {}", error))
 					.ifPresent(this::setAndFillProfile);
+		} else {
+			entityData.set(GAME_PROFILE, NO_PROFILE);
 		}
 	}
 
