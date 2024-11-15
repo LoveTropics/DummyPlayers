@@ -125,7 +125,8 @@ public class DummyPlayerEntity extends ArmorStand {
 	public void setAndFillProfile(ResolvableProfile profile) {
 		// Only update the profile (and thus the texture) if it has changed in some way
 		// Avoids unnecessary texture reloads on the client when changing pose/name
-		if (getProfile().equals(profile)) {
+		ResolvableProfile oldProfile = getProfile();
+		if (profile.name().equals(oldProfile.name()) && profile.id().equals(oldProfile.id())) {
 			return;
 		}
 		entityData.set(GAME_PROFILE, profile);
