@@ -168,7 +168,6 @@ public class DummyPlayerEntity extends ArmorStand {
 			if (profile.properties().isEmpty()) {
 				return () -> defaultSkin;
 			}
-			LOGGER.info("Loading skin data for GameProfile: {}", profile);
 			return createSkinLookup(profile.gameProfile(), defaultSkin);
 		}
 
