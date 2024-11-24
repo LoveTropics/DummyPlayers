@@ -197,10 +197,7 @@ public class DummyPlayerEntity extends ArmorStand {
 
 		private static Supplier<PlayerSkin> createSkinLookup(GameProfile profile, PlayerSkin defaultSkin) {
 			CompletableFuture<PlayerSkin> skinFuture = Minecraft.getInstance().getSkinManager().getOrLoad(profile);
-			return () -> {
-				PlayerSkin skin = skinFuture.getNow(defaultSkin);
-				return !skin.secure() ? defaultSkin : skin;
-			};
+			return () -> skinFuture.getNow(defaultSkin);
 		}
 
 		public PlayerSkin skin() {
