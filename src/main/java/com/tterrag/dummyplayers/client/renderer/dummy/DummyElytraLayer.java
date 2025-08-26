@@ -1,61 +1,55 @@
 package com.tterrag.dummyplayers.client.renderer.dummy;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.tterrag.dummyplayers.entity.DummyPlayerEntity;
-
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.Equippable;
 
-import java.util.Objects;
+import javax.annotation.Nullable;
 
-public class DummyElytraLayer extends RenderLayer<DummyPlayerEntity, DummyPlayerModel> {
-	private static final ResourceLocation TEXTURE_ELYTRA = ResourceLocation.withDefaultNamespace("textures/entity/elytra.png");
+public class DummyElytraLayer extends RenderLayer<DummyPlayerRenderState, DummyPlayerModel> {
+	private final ElytraModel model;
+	private final EquipmentLayerRenderer equipmentRenderer;
 
-	private final ElytraModel<DummyPlayerEntity> model;
-
-	public DummyElytraLayer(RenderLayerParent<DummyPlayerEntity, DummyPlayerModel> parent, EntityModelSet models) {
+	public DummyElytraLayer(RenderLayerParent<DummyPlayerRenderState, DummyPlayerModel> parent, EntityModelSet models, EquipmentLayerRenderer equipmentRenderer) {
 		super(parent);
-	    this.model = new ElytraModel<>(models.bakeLayer(ModelLayers.ELYTRA));
+		this.model = new ElytraModel(models.bakeLayer(ModelLayers.ELYTRA));
+		this.equipmentRenderer = equipmentRenderer;
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, DummyPlayerEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-		ItemStack chestItem = entity.getItemBySlot(EquipmentSlot.CHEST);
-		if (shouldRender(chestItem)) {
-			ResourceLocation texture = getElytraTexture(entity);
-			poseStack.pushPose();
-			poseStack.translate(0.0D, 0.0D, 0.125D);
-			this.getParentModel().copyPropertiesTo(this.model);
-			this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-			VertexConsumer builder = ItemRenderer.getFoilBuffer(bufferSource, this.model.renderType(texture), false, chestItem.hasFoil());
-			this.model.renderToBuffer(poseStack, builder, packedLight, OverlayTexture.NO_OVERLAY);
-			poseStack.popPose();
+	public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, DummyPlayerRenderState state, float yRot, float xRot) {
+		ItemStack chestEquipment = state.chestEquipment;
+		Equippable equippable = chestEquipment.get(DataComponents.EQUIPPABLE);
+		if (equippable == null || equippable.assetId().isEmpty()) {
+			return;
 		}
+		ResourceLocation texture = getTextureOverride(state);
+		poseStack.pushPose();
+		poseStack.translate(0.0F, 0.0F, 0.125F);
+		this.model.setupAnim(state);
+		this.equipmentRenderer.renderLayers(EquipmentClientInfo.LayerType.WINGS, equippable.assetId().get(), this.model, chestEquipment, poseStack, bufferSource, packedLight, texture);
+		poseStack.popPose();
 	}
 
-	private boolean shouldRender(ItemStack stack) {
-		return stack.is(Items.ELYTRA);
-	}
-
-	private ResourceLocation getElytraTexture(DummyPlayerEntity entity) {
-		PlayerSkin skin = entity.clientData().skin();
+	@Nullable
+	private static ResourceLocation getTextureOverride(DummyPlayerRenderState state) {
+		PlayerSkin skin = state.skin;
 		if (skin.elytraTexture() != null) {
 			return skin.elytraTexture();
 		} else if (skin.capeTexture() != null) {
 			return skin.capeTexture();
 		}
-		return TEXTURE_ELYTRA;
+		return null;
 	}
 }

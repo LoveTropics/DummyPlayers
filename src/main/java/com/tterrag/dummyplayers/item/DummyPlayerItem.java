@@ -12,8 +12,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,55 +34,55 @@ public class DummyPlayerItem extends Item {
 
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
-        if (context.getClickedFace() == Direction.DOWN) {
+		if (context.getClickedFace() == Direction.DOWN) {
 			return InteractionResult.FAIL;
 		}
 
-        Level level = context.getLevel();
-        BlockPos blockPos = new BlockPlaceContext(context).getClickedPos();
+		Level level = context.getLevel();
+		BlockPos blockPos = new BlockPlaceContext(context).getClickedPos();
 
 		Vec3 placePos = Vec3.atBottomCenterOf(blockPos);
 		AABB aabb = DummyPlayers.DUMMY_PLAYER.get().getDimensions().makeBoundingBox(placePos.x(), placePos.y(), placePos.z());
-        if (!level.noCollision(null, aabb) || !level.getEntities(null, aabb).isEmpty()) {
-            return InteractionResult.FAIL;
-        }
+		if (!level.noCollision(null, aabb) || !level.getEntities(null, aabb).isEmpty()) {
+			return InteractionResult.FAIL;
+		}
 
-        ItemStack itemStack = context.getItemInHand();
-        if (level instanceof ServerLevel serverLevel) {
-            Consumer<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
-            ResolvableProfile profile = itemStack.get(DataComponents.PROFILE);
-            if (profile != null) {
-                consumer = consumer.andThen(dummy -> dummy.setAndFillProfile(profile));
-            }
+		ItemStack itemStack = context.getItemInHand();
+		if (level instanceof ServerLevel serverLevel) {
+			Consumer<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
+			ResolvableProfile profile = itemStack.get(DataComponents.PROFILE);
+			if (profile != null) {
+				consumer = consumer.andThen(dummy -> dummy.setAndFillProfile(profile));
+			}
 
-            DummyPlayerEntity dummy = DummyPlayers.DUMMY_PLAYER.get().create(serverLevel, consumer, blockPos, MobSpawnType.SPAWN_EGG, true, true);
-            if (dummy == null) {
-                return InteractionResult.FAIL;
-            }
+			DummyPlayerEntity dummy = DummyPlayers.DUMMY_PLAYER.get().create(serverLevel, consumer, blockPos, EntitySpawnReason.SPAWN_ITEM_USE, true, true);
+			if (dummy == null) {
+				return InteractionResult.FAIL;
+			}
 
-            float angle = Mth.floor((Mth.wrapDegrees(context.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
-			dummy.moveTo(dummy.getX(), dummy.getY(), dummy.getZ(), angle, 0.0F);
-            this.applyRandomRotations(dummy, level.random);
-            serverLevel.addFreshEntityWithPassengers(dummy);
-            level.playSound(null, dummy.getX(), dummy.getY(),
-                    dummy.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS,
-                    0.75F, 0.8F);
+			float angle = Mth.floor((Mth.wrapDegrees(context.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
+			dummy.snapTo(dummy.getX(), dummy.getY(), dummy.getZ(), angle, 0.0F);
+			this.applyRandomRotations(dummy, level.random);
+			serverLevel.addFreshEntityWithPassengers(dummy);
+			level.playSound(null, dummy.getX(), dummy.getY(),
+					dummy.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS,
+					0.75F, 0.8F);
 
-        }
+		}
 
-        itemStack.consume(1, context.getPlayer());
-        return InteractionResult.sidedSuccess(level.isClientSide);
-    }
+		itemStack.consume(1, context.getPlayer());
+		return InteractionResult.SUCCESS;
+	}
 
 	private void applyRandomRotations(ArmorStand armorStand, RandomSource rand) {
 		Rotations rotations = armorStand.getHeadPose();
 		float f = rand.nextFloat() * 5.0F;
 		float f1 = rand.nextFloat() * 20.0F - 10.0F;
-		Rotations rotations1 = new Rotations(rotations.getX() + f, rotations.getY() + f1, rotations.getZ());
+		Rotations rotations1 = new Rotations(rotations.x() + f, rotations.y() + f1, rotations.z());
 		armorStand.setHeadPose(rotations1);
 		rotations = armorStand.getBodyPose();
 		f = rand.nextFloat() * 10.0F - 5.0F;
-		rotations1 = new Rotations(rotations.getX(), rotations.getY() + f, rotations.getZ());
+		rotations1 = new Rotations(rotations.x(), rotations.y() + f, rotations.z());
 		armorStand.setBodyPose(rotations1);
 	}
 }

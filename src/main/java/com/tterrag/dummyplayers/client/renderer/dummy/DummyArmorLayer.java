@@ -8,22 +8,24 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import org.checkerframework.checker.units.qual.A;
 
-public class DummyArmorLayer<T extends DummyPlayerEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
-	private final HumanoidArmorLayer<T, M, A> normal, slim;
-	
-	public DummyArmorLayer(RenderLayerParent<T, M> pRenderer, HumanoidArmorLayer<T, M, A> normal, HumanoidArmorLayer<T, M, A> slim) {
-		super(pRenderer);
+public class DummyArmorLayer<S extends DummyPlayerRenderState, M extends HumanoidModel<S>, A extends HumanoidModel<S>> extends RenderLayer<S, M> {
+	private final HumanoidArmorLayer<S, M, A> normal, slim;
+
+	public DummyArmorLayer(RenderLayerParent<S, M> parent, HumanoidArmorLayer<S, M, A> normal, HumanoidArmorLayer<S, M, A> slim) {
+		super(parent);
 		this.normal = normal;
 		this.slim = slim;
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-		HumanoidArmorLayer<T, M, A> model = switch (entity.clientData().skin().model()) {
+	public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, S state, float yRot, float xRot) {
+		HumanoidArmorLayer<S, M, A> layer = switch (state.skin.model()) {
 			case WIDE -> normal;
 			case SLIM -> slim;
 		};
-		model.render(poseStack, bufferSource, packedLight, entity, limbSwing, limbSwingAmount, partialTick, ageInTicks, netHeadYaw, headPitch);;
+		layer.render(poseStack, bufferSource, packedLight, state, yRot, xRot);
 	}
 }

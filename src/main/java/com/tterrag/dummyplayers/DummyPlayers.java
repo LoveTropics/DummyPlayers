@@ -30,13 +30,13 @@ public class DummyPlayers {
 
 	public static final String MODID = "dummyplayers";
 
-    private static final Lazy<Registrate> REGISTRATE = Lazy.of(() ->
-    	Registrate.create(MODID)
+	private static final Lazy<Registrate> REGISTRATE = Lazy.of(() ->
+		Registrate.create(MODID)
 			.defaultCreativeTab(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static Registrate registrate() {
-    	return REGISTRATE.get();
-    }
+	public static Registrate registrate() {
+		return REGISTRATE.get();
+	}
 
 	private static final DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZER_REGISTER = DeferredRegister.create(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, DummyPlayers.MODID);
 
@@ -45,8 +45,9 @@ public class DummyPlayers {
 			.register();
 
 	public static final EntityEntry<DummyPlayerEntity> DUMMY_PLAYER = registrate().object("dummy_player")
-			.<DummyPlayerEntity>entity(DummyPlayerEntity::new, MobCategory.MISC)
+			.entity(DummyPlayerEntity::new, MobCategory.MISC)
 			.properties(b -> b.sized(Player.DEFAULT_BB_WIDTH, Player.DEFAULT_BB_HEIGHT))
+			.renderer(() -> DummyPlayerEntityRenderer::new)
 			.register();
 
 	public static final ItemEntry<DummyPlayerItem> SPAWNER = registrate()
@@ -62,13 +63,8 @@ public class DummyPlayers {
 		event.put(DUMMY_PLAYER.get(), LivingEntity.createLivingAttributes().build());
 	}
 
-	@EventBusSubscriber(modid = DummyPlayers.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+	@EventBusSubscriber(modid = DummyPlayers.MODID, value = Dist.CLIENT)
 	public static class Client {
-		@SubscribeEvent
-		public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-			event.registerEntityRenderer(DUMMY_PLAYER.get(), DummyPlayerEntityRenderer::new);
-		}
-
 		@SubscribeEvent
 		public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
 			event.registerLayerDefinition(DummyStandLayer.LAYER, DummyStandLayer::createLayer);

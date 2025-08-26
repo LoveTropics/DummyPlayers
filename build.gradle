@@ -3,8 +3,7 @@ plugins {
     id 'idea'
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.0'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'net.neoforged.moddev' version '2.0.103'
 }
 
 group = 'com.tterrag.dummyplayers'
@@ -44,12 +43,12 @@ neoForge {
         }
 
         data {
-            data()
+            clientData()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
         configureEach {
-            logLevel = org.slf4j.event.Level.DEBUG
+            logLevel = org.slf4j.event.Level.WARN
         }
     }
 
@@ -66,29 +65,45 @@ sourceSets.main.resources {
 }
 
 repositories {
-    maven { url = "https://maven.ithundxr.dev/snapshots/" }
-    maven { url = "https://maven.tterrag.com/" }
+    maven {
+        url = 'https://maven.gegy.dev/releases'
+        content {
+            includeGroup 'com.tterrag.registrate'
+        }
+    }
     mavenLocal()
 }
 
 dependencies {
-    jarJar(implementation("com.tterrag.registrate:Registrate:MC1.21-${registrate_version}")) {
+    jarJar(implementation("com.tterrag.registrate:Registrate-LT:MC1.21.8-${registrate_version}")) {
         version {
-            strictly "[MC1.21-${registrate_version},MC1.22)"
-            prefer "MC1.21-${registrate_version}"
+            strictly "[MC1.21.8-${registrate_version},MC1.22)"
+            prefer "MC1.21.8-${registrate_version}"
         }
     }
 }
 
-tasks.withType(ProcessResources).configureEach {
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
     var replaceProperties = [
-            mod_version: mod_version,
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_version            : mod_version,
     ]
     inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
 
-    filesMatching(['META-INF/neoforge.mods.toml']) {
-        expand replaceProperties
-    }
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 idea {
