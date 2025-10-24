@@ -1,4 +1,7 @@
 {
+  "commands.dummyplayer.modified_dummy": "Modified Dummy Player profile",
+  "commands.dummyplayer.only_dummies": "Only Dummy Players entities can be modified",
+  "commands.dummyplayer.spawned_profile": "Spawn Dummy Player with profile",
   "entity.dummyplayers.dummy_player": "Dummy Player",
   "item.dummyplayers.dummy_player": "Dummy Player"
 }
