@@ -1,12 +1,17 @@
 package com.tterrag.dummyplayers;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.tterrag.dummyplayers.client.renderer.dummy.DummyPlayerEntityRenderer;
 import com.tterrag.dummyplayers.client.renderer.dummy.DummyStandLayer;
+import com.tterrag.dummyplayers.commands.DummyPlayersCommand;
 import com.tterrag.dummyplayers.entity.DummyPlayerEntity;
 import com.tterrag.dummyplayers.item.DummyPlayerItem;
 import com.tterrag.registrate.Registrate;
+import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.util.entry.EntityEntry;
 import com.tterrag.registrate.util.entry.ItemEntry;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -19,7 +24,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.Lazy;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -57,11 +64,21 @@ public class DummyPlayers {
 	public DummyPlayers(IEventBus modBus) {
 		DATA_SERIALIZER_REGISTER.register(modBus);
 		modBus.addListener(this::createAttributes);
-	}
+        NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+
+        registrate().addDataGenerator(ProviderType.LANG, p -> {
+           DummyPlayersCommand.addTranslations(p);
+        });
+    }
 
 	private void createAttributes(EntityAttributeCreationEvent event) {
 		event.put(DUMMY_PLAYER.get(), LivingEntity.createLivingAttributes().build());
 	}
+
+    private void onRegisterCommands(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+        DummyPlayersCommand.register(dispatcher);
+    }
 
 	@EventBusSubscriber(modid = DummyPlayers.MODID, value = Dist.CLIENT)
 	public static class Client {
