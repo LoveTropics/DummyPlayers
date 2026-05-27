@@ -10,7 +10,6 @@ import com.tterrag.registrate.Registrate;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.util.entry.EntityEntry;
 import com.tterrag.registrate.util.entry.ItemEntry;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,56 +34,56 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 @Mod("dummyplayers")
 public class DummyPlayers {
 
-	public static final String MODID = "dummyplayers";
+    public static final String MODID = "dummyplayers";
 
-	private static final Lazy<Registrate> REGISTRATE = Lazy.of(() ->
-		Registrate.create(MODID)
-			.defaultCreativeTab(CreativeModeTabs.TOOLS_AND_UTILITIES));
+    private static final Lazy<Registrate> REGISTRATE = Lazy.of(() ->
+            Registrate.create(MODID)
+                    .defaultCreativeTab(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-	public static Registrate registrate() {
-		return REGISTRATE.get();
-	}
+    public static Registrate registrate() {
+        return REGISTRATE.get();
+    }
 
-	private static final DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZER_REGISTER = DeferredRegister.create(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, DummyPlayers.MODID);
+    private static final DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZER_REGISTER = DeferredRegister.create(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, DummyPlayers.MODID);
 
-	public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<ResolvableProfile>> PROFILE_SERIALIZER = registrate().object("profile")
-			.generic(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, () -> EntityDataSerializer.forValueType(ResolvableProfile.STREAM_CODEC))
-			.register();
+    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<ResolvableProfile>> PROFILE_SERIALIZER = registrate().object("profile")
+            .generic(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, () -> EntityDataSerializer.forValueType(ResolvableProfile.STREAM_CODEC))
+            .register();
 
-	public static final EntityEntry<DummyPlayerEntity> DUMMY_PLAYER = registrate().object("dummy_player")
-			.entity(DummyPlayerEntity::new, MobCategory.MISC)
-			.properties(b -> b.sized(Player.DEFAULT_BB_WIDTH, Player.DEFAULT_BB_HEIGHT))
-			.renderer(() -> DummyPlayerEntityRenderer::new)
-			.register();
+    public static final EntityEntry<DummyPlayerEntity> DUMMY_PLAYER = registrate().object("dummy_player")
+            .entity(DummyPlayerEntity::new, MobCategory.MISC)
+            .properties(b -> b.sized(Player.DEFAULT_BB_WIDTH, Player.DEFAULT_BB_HEIGHT))
+            .renderer(() -> DummyPlayerEntityRenderer::new)
+            .register();
 
-	public static final ItemEntry<DummyPlayerItem> SPAWNER = registrate()
-			.item(DummyPlayerItem::new)
-			.register();
+    public static final ItemEntry<DummyPlayerItem> SPAWNER = registrate()
+            .item(DummyPlayerItem::new)
+            .register();
 
-	public DummyPlayers(IEventBus modBus) {
-		DATA_SERIALIZER_REGISTER.register(modBus);
-		modBus.addListener(this::createAttributes);
+    public DummyPlayers(IEventBus modBus) {
+        DATA_SERIALIZER_REGISTER.register(modBus);
+        modBus.addListener(this::createAttributes);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
 
         registrate().addDataGenerator(ProviderType.LANG, p -> {
-           DummyPlayersCommand.addTranslations(p);
+            DummyPlayersCommand.addTranslations(p);
         });
     }
 
-	private void createAttributes(EntityAttributeCreationEvent event) {
-		event.put(DUMMY_PLAYER.get(), LivingEntity.createLivingAttributes().build());
-	}
+    private void createAttributes(EntityAttributeCreationEvent event) {
+        event.put(DUMMY_PLAYER.get(), LivingEntity.createLivingAttributes().build());
+    }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         DummyPlayersCommand.register(dispatcher);
     }
 
-	@EventBusSubscriber(modid = DummyPlayers.MODID, value = Dist.CLIENT)
-	public static class Client {
-		@SubscribeEvent
-		public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-			event.registerLayerDefinition(DummyStandLayer.LAYER, DummyStandLayer::createLayer);
-		}
-	}
+    @EventBusSubscriber(modid = DummyPlayers.MODID, value = Dist.CLIENT)
+    public static class Client {
+        @SubscribeEvent
+        public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+            event.registerLayerDefinition(DummyStandLayer.LAYER, DummyStandLayer::createLayer);
+        }
+    }
 }
