@@ -14,6 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PostSpawnProcessor;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +50,7 @@ public class DummyPlayerItem extends Item {
 
         ItemStack itemStack = context.getItemInHand();
         if (level instanceof ServerLevel serverLevel) {
-            Consumer<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
+            PostSpawnProcessor<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
             ResolvableProfile profile = itemStack.get(DataComponents.PROFILE);
             if (profile != null) {
                 consumer = consumer.andThen(dummy -> dummy.setAndFillProfile(profile));

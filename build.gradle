@@ -11,14 +11,12 @@ base {
     archivesName = 'DummyPlayers'
 }
 
-ext.buildnumber = 0
-project.buildnumber = System.getenv('BUILD_NUMBER') ?: 'custom'
+def env = System.getenv()
 
-if (System.getenv('GITHUB_RUN_NUMBER')) {
-    project.buildnumber = System.getenv('GITHUB_RUN_NUMBER')
-    version = "${mod_version}-${release_type}+${buildnumber}-gha"
+if (env.GITHUB_RUN_NUMBER) {
+    version = "$mod_version.${env.GITHUB_RUN_NUMBER}"
 } else {
-    version = "${mod_version}-${release_type}+${buildnumber}"
+    version = "$mod_version.0-SNAPSHOT"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -70,10 +68,10 @@ repositories {
 }
 
 dependencies {
-    jarJar(implementation("com.tterrag.registrate:Registrate:MC26.1-${registrate_version}")) {
+    jarJar(implementation("com.tterrag.registrate:Registrate:MC26.2-${registrate_version}")) {
         version {
-            strictly "[MC26.1-${registrate_version},MC26.2)"
-            prefer "MC26.1-${registrate_version}"
+            strictly "[MC26.2-${registrate_version},MC26.3)"
+            prefer "MC26.2-${registrate_version}"
         }
     }
 }
