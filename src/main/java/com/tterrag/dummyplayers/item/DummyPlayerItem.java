@@ -53,7 +53,7 @@ public class DummyPlayerItem extends Item {
             PostSpawnProcessor<DummyPlayerEntity> consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, context.getPlayer());
             ResolvableProfile profile = itemStack.get(DataComponents.PROFILE);
             if (profile != null) {
-                consumer = consumer.andThen(dummy -> dummy.setAndFillProfile(profile));
+                consumer = consumer.andThen(dummy -> dummy.setProfile(profile));
             }
 
             DummyPlayerEntity dummy = DummyPlayers.DUMMY_PLAYER.get().create(serverLevel, consumer, blockPos, EntitySpawnReason.SPAWN_ITEM_USE, true, true);

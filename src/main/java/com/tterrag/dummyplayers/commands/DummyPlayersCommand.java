@@ -113,7 +113,7 @@ public class DummyPlayersCommand {
     }
 
     private static int modifyDummyProfile(CommandContext<CommandSourceStack> ctx, DummyPlayerEntity dummy, ResolvableProfile profile) {
-        dummy.setAndFillProfile(profile);
+        dummy.setProfile(profile);
         ctx.getSource().sendSuccess(() -> Component.translatable("commands.dummyplayer.modified_dummy"), true);
 
         return Command.SINGLE_SUCCESS;
@@ -136,7 +136,7 @@ public class DummyPlayersCommand {
 
         ServerLevel serverLevel = ctx.getSource().getLevel();
         DummyPlayerEntity dummy = DummyPlayers.DUMMY_PLAYER.get().create(serverLevel, dummyPlayerEntity -> dummyPlayerEntity
-                .setAndFillProfile(profile), pos, EntitySpawnReason.SPAWN_ITEM_USE, true, true);
+                .setProfile(profile), pos, EntitySpawnReason.SPAWN_ITEM_USE, true, true);
         serverLevel.addFreshEntityWithPassengers(dummy);
         ctx.getSource().sendSuccess(() -> Component.translatable("commands.dummyplayer.spawned_profile"), true);
         return Command.SINGLE_SUCCESS;

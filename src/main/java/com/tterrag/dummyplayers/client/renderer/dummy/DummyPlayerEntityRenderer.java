@@ -3,6 +3,7 @@ package com.tterrag.dummyplayers.client.renderer.dummy;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.tterrag.dummyplayers.entity.DummyPlayerEntity;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -16,11 +17,13 @@ import net.minecraft.resources.Identifier;
 
 public class DummyPlayerEntityRenderer extends LivingEntityRenderer<DummyPlayerEntity, DummyPlayerRenderState, DummyPlayerModel> {
 
+    private final PlayerSkinRenderCache playerSkinRenderCache;
     private final DummyPlayerModel slim;
     private final DummyPlayerModel normal;
 
     public DummyPlayerEntityRenderer(EntityRendererProvider.Context context) {
         super(context, new DummyPlayerModel(context.bakeLayer(ModelLayers.PLAYER)), 0);
+        playerSkinRenderCache = context.getPlayerSkinRenderCache();
         this.normal = this.model;
         this.slim = new DummyPlayerModel(context.bakeLayer(ModelLayers.PLAYER_SLIM));
         this.addLayer(new DummyStandLayer(this, context.getModelSet()));
@@ -51,7 +54,7 @@ public class DummyPlayerEntityRenderer extends LivingEntityRenderer<DummyPlayerE
     public void extractRenderState(DummyPlayerEntity entity, DummyPlayerRenderState state, float partialTicks) {
         super.extractRenderState(entity, state, partialTicks);
         HumanoidMobRenderer.extractHumanoidRenderState(entity, state, partialTicks, this.itemModelResolver);
-        state.skin = entity.clientData().skin();
+        state.skin = playerSkinRenderCache.getOrDefault(entity.getProfile()).playerSkin();
         state.headPose = entity.getHeadPose();
         state.bodyPose = entity.getBodyPose();
         state.leftArmPose = entity.getLeftArmPose();
