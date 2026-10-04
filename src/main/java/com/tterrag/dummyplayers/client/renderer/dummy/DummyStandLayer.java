@@ -19,12 +19,13 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 
 public class DummyStandLayer extends RenderLayer<DummyPlayerRenderState, DummyPlayerModel> {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(DummyPlayers.DUMMY_PLAYER.getId(), "stand");
 
-    private final Model standModel;
+    private final Model<Unit> standModel;
     private final ModelPart standBase;
 
     public DummyStandLayer(RenderLayerParent<DummyPlayerRenderState, DummyPlayerModel> parent, EntityModelSet context) {
@@ -56,12 +57,12 @@ public class DummyStandLayer extends RenderLayer<DummyPlayerRenderState, DummyPl
         submitNodeCollector
                 .submitModel(
                         this.standModel,
-                        state,
+                        Unit.INSTANCE,
                         poseStack,
                         this.standModel.renderType(ArmorStandRenderer.DEFAULT_SKIN_LOCATION),
                         lightCoords,
                         LivingEntityRenderer.getOverlayCoords(state, 0.0F),
-                        CommonColors.BLACK,
+                        CommonColors.WHITE,
                         null,
                         state.outlineColor,
                         null
